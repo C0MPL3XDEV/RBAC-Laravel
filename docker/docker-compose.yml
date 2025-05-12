@@ -1,0 +1,29 @@
+services:
+  mariadb:
+    image: mariadb:10.3
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db-dump:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=0Nf906!=azj~
+      - MYSQL_USER=laravel-permission
+      - MYSQL_PASSWORD=V=}3W8d2O717
+      - MYSQL_DATABASE=laravel_roles
+    networks:
+      - laravel_permissions
+
+  phpMyAdmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8084:80"
+    environment:
+      - PMA_HOST=mariadb
+      - PMA_PORT=3306
+    networks:
+      - laravel_permissions
+
+networks:
+  laravel_permissions:
+    driver: bridge
