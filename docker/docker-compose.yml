@@ -6,10 +6,10 @@ services:
     volumes:
       - ./db-dump:/docker-entrypoint-initdb.d
     environment:
-      - MYSQL_ROOT_PASSWORD=0Nf906!=azj~
-      - MYSQL_USER=laravel-permission
-      - MYSQL_PASSWORD=V=}3W8d2O717
-      - MYSQL_DATABASE=laravel_roles
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     networks:
       - laravel_permissions
 
