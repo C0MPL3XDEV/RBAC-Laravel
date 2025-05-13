@@ -49,8 +49,8 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $token,
-            'roles' => $user->getRoleNames(), // Get user Roles
-            'permissions' => $user->getAllPermissions()->pluck('name'), // Get user Permissions
+            'user_roles' => $user->getRoleNames(), // Get user Roles
+            'user_permissions' => $user->getAllPermissions()->pluck('name'), // Get user Permissions
         ], 201);
     }
 
@@ -65,6 +65,10 @@ class AuthController extends Controller
     }
 
     public function me(Request $request): JsonResponse {
-        return response()->json($request->user());
+        return response()->json([
+            'user' => $request->user(),
+            'user_roles' => $request->user()->getRoleNames(),
+            'user_permissions' => $request->user()->getAllPermissions()->pluck('name'),
+        ]);
     }
 }
