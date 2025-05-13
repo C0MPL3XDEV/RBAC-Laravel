@@ -35,7 +35,7 @@ class RoleAndPermissionsSeeder extends Seeder
 
         // Cycle to create all permissions in the array
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'api']); // Create permission
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'sanctum']); // Create permission
         }
 
         // Define standard role to create
@@ -53,7 +53,7 @@ class RoleAndPermissionsSeeder extends Seeder
 
         // Cycle to create all roles in the array with correct permissions
         foreach ($roles as $role => $rolePermissions) {
-            $roleModel = Role::firstOrCreate(['name' => $role, 'guard_name' => 'api']); // Create role
+            $roleModel = Role::firstOrCreate(['name' => $role, 'guard_name' => 'sanctum']); // Create role
 
             // Get the permission model for each (permissions) for each role and set permissions to the role
             foreach ($rolePermissions as $permission) {

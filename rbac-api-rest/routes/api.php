@@ -15,3 +15,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum', 'permission:view-roles'])->group(function () {
     Route::get('/roles', [RoleController::class, 'index']);
 });
+
+Route::middleware(['auth:sanctum', 'permission:create-roles'])->group(function () {
+    Route::post('/roles/create', [RoleController::class, 'store']);
+});
