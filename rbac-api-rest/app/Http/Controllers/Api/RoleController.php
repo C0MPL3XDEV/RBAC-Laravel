@@ -69,13 +69,13 @@ class RoleController extends Controller
 
         // Validate data to update role
         $validated = $request->validate([
-            'role_name' => 'required|exists:roles,name|string' . $role->id,
+            'role_name' => 'required|string',
             'permissions' => 'required|array',
             'permissions.*' => 'exists:permissions,name'
         ]);
 
         // Check if the user have the permission to update role
-        if (!$request->user()->can('update-roles')) {
+        if (!$request->user()->can('edit-roles')) {
             return response()->json([
                 'success' => false,
                 'message' => 'You do not have permission to update roles.'
@@ -98,10 +98,11 @@ class RoleController extends Controller
         ]);
     }
 
-    public function destroy(Role $role, Request $request): JsonResponse {
+    public function destroy(Request $request, $id): JsonResponse {
 
         // The $role parameter is automatically injected by Laravel's route model binding,
         // and contains the Role instance corresponding to the ID provided in the route.
+        $role = Role::findById($id);
 
         // Check if the user have the permission to delete the role
         if (!$request->user()->can('delete-roles')) {
@@ -112,7 +113,7 @@ class RoleController extends Controller
         }
 
         // Check if the role want to delete the user is super-admin and block the delete action
-        if ($role->name == 'super-admin') {
+        if ($role->name == "super-admin") {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot delete super-admin role.'
@@ -124,7 +125,16 @@ class RoleController extends Controller
         // Deletes the role. Assigned permissions remain in the permissions table,
         // but the pivot relationships (e.g. with users) are removed automatically.
 
-        $role->delete();
+        try {
+            $role->delete();
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -132,10 +142,12 @@ class RoleController extends Controller
         ], 200);
     }
 
-    public function getRoleById(Role $role, Request $request): JsonResponse
+    public function getRoleById(Request $request, $id): JsonResponse
     {
         // The $role parameter is automatically injected by Laravel's route model binding,
         // and contains the Role instance corresponding to the ID provided in the route.
+
+        $role = Role::with('permissions')->findOrFail($id);
 
         // Check if the user have the permission to view roles
         if (!$request->user()->can('view-roles')) {
