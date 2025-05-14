@@ -98,7 +98,7 @@ class RoleController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, $id): JsonResponse {
+    public function destroy(Request $request, $id): JsonResponse { // TODO: Bug Fix
 
         // The $role parameter is automatically injected by Laravel's route model binding,
         // and contains the Role instance corresponding to the ID provided in the route.
