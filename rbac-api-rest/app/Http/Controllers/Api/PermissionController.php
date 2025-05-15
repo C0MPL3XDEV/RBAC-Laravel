@@ -69,10 +69,14 @@ class PermissionController extends Controller
 
     public function update(Request $request, $permissionId): JsonResponse {
 
+        // $permissionId it's a dynamic parameter passed by route
+
+        // Validate the data to update the permission
         $validated = $request->validate([
             "permission_name" => "required|string",
         ]);
 
+        // Check if the user have the permission to update a permission
         if  (!$request->user()->can('update-permissions')) {
             return response()->json([
                 "success" => false,
@@ -81,16 +85,16 @@ class PermissionController extends Controller
         }
 
         try  {
-            $permission = Permission::findById($permissionId);
-            $permission->update(['name' => $validated["permission_name"]]);
+            $permission = Permission::findById($permissionId); // Find the correct permission by ID
+            $permission->update(['name' => $validated["permission_name"]]); // Execute the update of the permission
 
-            return response()->json([
+            return response()->json([ // Return the permission updated
                 "success" => true,
                 "message" => "Permission updated successfully.",
                 "permission" => $permission,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Catch the error in the process to update
             return response()->json([
                 "success" => false,
                 "message" => "An error occurred while updating permission.",
@@ -101,6 +105,9 @@ class PermissionController extends Controller
 
     public function destroy(Request $request, $permissionId): JsonResponse {
 
+        // $permissionId it's a dynamic parameter passed by the route
+
+        // Check if the user have the permission to delete a permission
         if (!$request->user()->can('delete-permissions')) {
             return response()->json([
                 "success" => false,
@@ -109,16 +116,16 @@ class PermissionController extends Controller
         }
 
         try {
-            $permission = Permission::findById($permissionId);
-            $permission->users()->detach();
-            $permission->roles()->detach();
-            $permission->delete();
+            $permission = Permission::findById($permissionId); // Find the correct permission by ID
+            $permission->users()->detach(); // Remove the permission relations with users before deleting
+            $permission->roles()->detach(); // Remove the permission relations with roles before deleting
+            $permission->delete(); // Delete the permission
 
             return response()->json([
                 "success" => true,
                 "message" => "Permission deleted successfully.",
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Catch errors in the deleting process
             return response()->json([
                 "success" => false,
                 "message" => "An error occurred while deleting permission.",
@@ -130,6 +137,9 @@ class PermissionController extends Controller
 
     public function getPermissionById(Request $request, $permissionId): JsonResponse {
 
+        // The $permissionId it's a dynamic parameter passed by the route
+
+        // Check if the user have the permission to view permissions
         if (!$request->user()->can('view-permissions')) {
             return response()->json([
                 "success" => false,
@@ -138,6 +148,7 @@ class PermissionController extends Controller
         }
 
         try {
+            // Get the permissions data with roles relations to view where the permission are used
             $permission = Permission::findById($permissionId)->with('roles')->firstOrFail();
 
             return response()->json([
@@ -145,7 +156,7 @@ class PermissionController extends Controller
                 "permission" => $permission,
             ], 200);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $e) { // Catch Errors
             return response()->json([
                 "success" => false,
                 "message1" => "An error occurred while getting permission.",
@@ -156,11 +167,15 @@ class PermissionController extends Controller
 
     public function assignToRole(Request $request, $roleId): JsonResponse {
 
+        // The $roleId it's a dynamic parameter passed by the route
+
+        // Validate data to assign permissions to the role
         $validated = $request->validate([
-            "permissions" => "required|array",
+            "permissions" => "required|array", // Permissions array
             "permissions.*" => "required|string|exists:permissions,name",
         ]);
 
+        // Check if the user have the permission to update permissions
         if (!$request->user()->can('update-permissions')) {
             return response()->json([
                 "success" => false,
@@ -169,8 +184,8 @@ class PermissionController extends Controller
         }
 
         try {
-            $role = Role::findOrFail($roleId);
-            $role->givePermissionTo($validated["permissions"]);
+            $role = Role::findOrFail($roleId); // Find the role to assign permissions
+            $role->givePermissionTo($validated["permissions"]); // Assign permissions to the role
 
             return response()->json([
                 "success" => true,
@@ -188,11 +203,15 @@ class PermissionController extends Controller
 
     public function revokeFromRole(Request $request, $roleId): JsonResponse {
 
+        // $roleId it's a dynamic parameter passed from the route binding
+
+        // Validate data to permission to assign at the role
         $validated = $request->validate([
             "permissions" => "required|array",
             "permissions.*" => "required|string|exists:permissions,name",
         ]);
 
+        // Check if the user have the permission to revoke a permission
         if (!$request->user()->can("revoke-permissions")) {
             return response()->json([
                 "success" => false,
@@ -200,7 +219,21 @@ class PermissionController extends Controller
             ], 403);
         }
 
-        return response()->json([]);
+        try {
+            $role = Role::findOrFail($roleId); // Find the role with data by ID
+            $role->revokePermissionTo($validated["permissions"]); // Assign permission passed to the role
+
+            return response()->json([
+               "success" => true,
+               "message" => "Permission revoked successfully.",
+            ]);
+        } catch (\Exception $e) { // Catch errors
+            return response()->json([
+                "success" => false,
+                "message" => "An error occurred while revoking permission from the role.",
+                "error" => $e->getMessage(),
+            ]);
+        }
     }
 
 }
