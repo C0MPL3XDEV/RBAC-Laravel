@@ -116,7 +116,7 @@ class PermissionController extends Controller
         }
 
         try {
-            $permission = Permission::findById($permissionId); // Find the correct permission by ID
+            $permission = Permission::findOrFail($permissionId); // Find the correct permission by ID
             $permission->users()->detach(); // Remove the permission relations with users before deleting
             $permission->roles()->detach(); // Remove the permission relations with roles before deleting
             $permission->delete(); // Delete the permission
@@ -176,7 +176,7 @@ class PermissionController extends Controller
         ]);
 
         // Check if the user have the permission to update permissions
-        if (!$request->user()->can('update-permissions')) {
+        if (!$request->user()->can('assign-permissions')) {
             return response()->json([
                 "success" => false,
                 "message" => "You do not have permission to update permissions.",
