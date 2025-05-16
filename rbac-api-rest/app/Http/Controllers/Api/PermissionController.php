@@ -103,9 +103,12 @@ class PermissionController extends Controller
         }
     }
 
-    public function destroy(Request $request, $permissionId): JsonResponse {
+    public function destroy(Request $request, Permission $permission): JsonResponse { // TODO: FIX ERROR
 
-        // $permissionId it's a dynamic parameter passed by the route
+        // $permission it's a dynamic parameter passed by the route
+
+//        echo "Utente loggato: ". $request->user()->email . PHP_EOL;
+//        echo"DUMP: ".PHP_EOL.var_export($request->user()->getRoleNames(), true).PHP_EOL.var_export($request->user()->getAllPermissions(), true).PHP_EOL;
 
         // Check if the user have the permission to delete a permission
         if (!$request->user()->can('delete-permissions')) {
@@ -116,7 +119,7 @@ class PermissionController extends Controller
         }
 
         try {
-            $permission = Permission::findOrFail($permissionId); // Find the correct permission by ID
+
             $permission->users()->detach(); // Remove the permission relations with users before deleting
             $permission->roles()->detach(); // Remove the permission relations with roles before deleting
             $permission->delete(); // Delete the permission
@@ -125,6 +128,7 @@ class PermissionController extends Controller
                 "success" => true,
                 "message" => "Permission deleted successfully.",
             ], 200);
+
         } catch (\Exception $e) { // Catch errors in the deleting process
             return response()->json([
                 "success" => false,
@@ -132,7 +136,6 @@ class PermissionController extends Controller
                 "error" => $e->getMessage(),
             ], 500);
         }
-
     }
 
     public function getPermissionById(Request $request, $permissionId): JsonResponse {

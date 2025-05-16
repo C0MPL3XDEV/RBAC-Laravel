@@ -15,6 +15,7 @@ class ProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        // Check if the user have the permission to view products
         if (!$request->user()->can('view-products')) {
             return response()->json([
                 "success" => false,
@@ -22,11 +23,11 @@ class ProductController extends Controller
             ], 403);
         }
 
-        $product = Product::paginate(10);
+        $product = Product::paginate(10); // Return paginated products
 
         return response()->json([
             "success" => true,
-            "product" => $product,
+            "product" => $product, // Return products response
         ]);
     }
 
@@ -36,6 +37,7 @@ class ProductController extends Controller
 
     public function store(Request $request) : JsonResponse
     {
+        // Check if the user have the permission to create a product
         if (!$request->user()->can('create-products')) {
             return response()->json([
                 "success" => false,
@@ -43,6 +45,7 @@ class ProductController extends Controller
             ]);
         }
 
+        // Validate data to create a product
         $validated = $request->validate([
             "name" => "required|string|max:255",
             "description" => "required|string",
@@ -52,9 +55,9 @@ class ProductController extends Controller
             "is_active" => "required|boolean",
         ]);
 
-        $product = Product::create($validated);
+        $product = Product::create($validated); // Create product with validated data
 
-        return response()->json([
+        return response()->json([ // Return response with product data created
             "success" => true,
             "message" => "Product created successfully!",
             "product" => $product,
@@ -67,6 +70,10 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product) : JsonResponse
     {
+        // The $product parameter is automatically injected by Laravel's route model binding,
+        // and contains the Product model instance corresponding to the ID provided in the route.
+
+        // Check if the user have the permission to update a product
         if (!$request->user()->can('update-products')) {
             return response()->json([
                 "success" => false,
@@ -74,6 +81,7 @@ class ProductController extends Controller
             ], 403);
         }
 
+        // Validated data to update a product
         $validated = $request->validate([
             "name" => "required|string|max:255",
             "description" => "required|string",
@@ -83,9 +91,9 @@ class ProductController extends Controller
             "is_active" => "required|boolean",
         ]);
 
-        $product->update($validated);
+        $product->update($validated); // Update the product with validated data
 
-        return response()->json([
+        return response()->json([ // Return response with product data updated
             "success" => true,
             "message" => "Product updated successfully!",
             "product" => $product,
@@ -98,6 +106,10 @@ class ProductController extends Controller
 
     public function destroy(Request $request, Product $product) : JsonResponse
     {
+        // The $product parameter is automatically injected by Laravel's route model binding,
+        // and contains the Product model instance corresponding to the ID provided in the route.
+
+        // Check if the user have the permission to delete the product
         if (!$request->user()->can('delete-products')) {
             return response()->json([
                 "success" => false,
@@ -105,7 +117,7 @@ class ProductController extends Controller
             ], 403);
         }
 
-        $product->delete();
+        $product->delete(); // Delete the product
 
         return response()->json([
             "success" => true,
@@ -113,7 +125,15 @@ class ProductController extends Controller
         ]);
     }
 
-    public function getProduct(Request $request, Product $product): JsonResponse {
+    /**
+     * GET a specific product by ID
+     */
+    public function getProductById(Request $request, Product $product): JsonResponse {
+
+        // The $product parameter is automatically injected by Laravel's route model binding,
+        // and contains the Product model instance corresponding to the ID provided in the route.
+
+        // Check if the product have the permission to view a product
         if (!$request->user()->can('view-products')) {
             return response()->json([
                 "success" => false,
@@ -121,7 +141,7 @@ class ProductController extends Controller
             ], 403);
         }
 
-        return response()->json([
+        return response()->json([ // Return the response with product data
             "success" => true,
             "product" => $product,
         ]);
